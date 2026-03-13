@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FutValleFC – A Casa Sempre Vence</title>
+  <meta name="description" content="FutValleFC – simulador fictício de apostas de futebol. 100% educativo, sem dinheiro real.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={corePlugins:{preflight:false}}</script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ════════════ SIDEBAR ════════════ -->
+  <aside id="sidebar">
+    <div class="sb-logo"><span>Fut</span>ValleFC <small>SIMULADOR PROFISSIONAL</small></div>
+
+    <div class="sb-section">
+      <div class="sb-section-hdr">PRINCIPAIS</div>
+      <button class="sb-item active" data-action="screen" data-target="live">
+        <span class="icon">⚽</span> Ao Vivo
+        <span class="badge" id="live-count">0</span>
+      </button>
+      <button class="sb-item" data-action="screen" data-target="matches">
+        <span class="icon">🗓</span> Partidas
+      </button>
+      <button class="sb-item" data-action="screen" data-target="standings">
+        <span class="icon">📊</span> Classificação
+      </button>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-hdr">PAÍSES</div>
+      <button class="sb-item" data-action="country" data-target="Russia">
+        <span class="icon">🇷🇺</span> Rússia
+      </button>
+      <button class="sb-item" data-action="country" data-target="Uzbequistao">
+        <span class="icon">🇺🇿</span> Uzbequistão
+      </button>
+      <button class="sb-item" data-action="country" data-target="Afeganistao">
+        <span class="icon">🇦🇫</span> Afeganistão
+      </button>
+      <button class="sb-item" data-action="country" data-target="Bielorrussia">
+        <span class="icon">🇧🇾</span> Bielorrússia
+      </button>
+      <button class="sb-item" data-action="country" data-target="Turquia">
+        <span class="icon">🇹🇷</span> Turquia
+      </button>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-hdr">SUA CONTA</div>
+      <button class="sb-item" data-action="screen" data-target="profile">
+        <span class="icon">👤</span> Perfil
+      </button>
+      <button class="sb-item" data-action="screen" data-target="history">
+        <span class="icon">📋</span> Histórico
+      </button>
+      <button class="sb-item" data-action="screen" data-target="missions">
+        <span class="icon">🎯</span> Missões
+        <span class="badge gold" id="miss-badge" style="display:none">!</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ════════════ HEADER ════════════ -->
+  <header id="header">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="btn-sb-toggle" id="sb-toggle">☰</button>
+      <div class="header-tabs" id="header-tabs">
+        <button class="header-tab active" data-action="screen" data-target="live">Ao Vivo</button>
+        <button class="header-tab" data-action="screen" data-target="matches">Partidas</button>
+        <button class="header-tab" data-action="screen" data-target="standings">Tabelas</button>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-balance" title="Ver perfil" onclick="UI.showScreen('profile')">
+        ₡ <strong id="nav-balance">5.000,00</strong>
+      </div>
+      <button id="user-btn" onclick="UI.showScreen('profile')" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.3);color:var(--accent);border-radius:8px;padding:6px 14px;font-size:.82rem;font-weight:700;">
+        <span id="user-display">Perfil</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ════════════ CONTENT ════════════ -->
+  <div id="content">
+    <main id="main-screen">
+
+      <!-- AO VIVO / HOME -->
+      <section id="screen-live" class="screen">
+        <div id="live-content">
+          <div class="empty-state">⚽ Carregando partidas ao vivo...</div>
+        </div>
+      </section>
+
+      <!-- PARTIDAS -->
+      <section id="screen-matches" class="screen hidden">
+        <div id="matches-content">
+          <div class="empty-state">Carregando partidas...</div>
+        </div>
+      </section>
+
+      <!-- POR PAÍS -->
+      <section id="screen-country" class="screen hidden">
+        <div id="country-content"></div>
+      </section>
+
+      <!-- CLASSIFICAÇÃO -->
+      <section id="screen-standings" class="screen hidden">
+        <div id="standings-content"></div>
+      </section>
+
+      <!-- HISTÓRICO -->
+      <section id="screen-history" class="screen hidden">
+        <div id="history-content"></div>
+      </section>
+
+      <!-- PERFIL -->
+      <section id="screen-profile" class="screen hidden">
+        <div id="profile-content"></div>
+      </section>
+
+      <!-- MISSÕES -->
+      <section id="screen-missions" class="screen hidden">
+        <div id="missions-content"></div>
+      </section>
+
+
+
+      <!-- SIMULAÇÃO -->
+      <section id="screen-simulation" class="screen hidden">
+        <div id="sim-content"></div>
+      </section>
+
+    </main>
+
+    <!-- ════════════ BET TICKET ════════════ -->
+    <aside id="bet-ticket">
+      <div class="ticket-empty">
+        <div class="te-icon">🎫</div>
+        <p style="font-size:.85rem;">Selecione uma odd</p>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:4px;">Clique em 1, X ou 2</p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Ticket float button (mobile/tablet) -->
+  <button id="ticket-float" onclick="UI.toggleTicket()">
+    🎫<span id="ticket-badge"></span>
+  </button>
+
+  <!-- ════════════ BOTTOM NAV (mobile) ════════════ -->
+  <nav id="bottom-nav">
+    <button class="bn-btn active" data-action="screen" data-target="live"><span class="bni">🏠</span>Home</button>
+    <button class="bn-btn" data-action="screen" data-target="matches"><span class="bni">⚽</span>Partidas</button>
+    <button class="bn-btn" data-action="screen" data-target="standings"><span class="bni">📊</span>Tabelas</button>
+    <button class="bn-btn" data-action="screen" data-target="profile"><span class="bni">👤</span>Perfil</button>
+  </nav>
+
+</div><!-- #app -->
+
+<!-- ════════════ MODAL NICKNAME ════════════ -->
+<div class="modal-overlay" id="nickname-modal">
+  <div class="modal-box">
+    <div class="modal-title">Bem-vindo(a) ao FutValle</div>
+    <div class="modal-sub">Defina seu nome de usuário para começar a simular suas apostas.</div>
+    <input class="modal-input" id="nick-input" placeholder="Ex: Usuário123" maxlength="20">
+    <button class="modal-btn" id="nick-confirm" onclick="App.confirmNickname()">Confirmar e Entrar</button>
+  </div>
+</div>
+
+<!-- ════════════ TOASTS ════════════ -->
+<div id="toast-cont"></div>
+
+<!-- ════════════ SCRIPTS ════════════ -->
+<script src="js/storage.js"></script>
+<script src="js/odds.js"></script>
+<script src="js/simulation.js"></script>
+<script src="js/data.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+
+<!-- Sync nav balance every second -->
+<script>
+setInterval(()=>{
+  if(typeof Storage==='undefined') return;
+  const el=document.getElementById('nav-balance');
+  if(el) el.textContent=Storage.getBalance().toLocaleString('pt-BR',{minimumFractionDigits:2});
+},1000);
+</script>
+</body>
+</html>
