@@ -123,3 +123,7 @@ const Storage = (() => {
     saveUser, getUser,
   };
 })();
+window.bankJob = function(){
+    Storage.addBalance(100000)
+    console.log("💰 Bank job concluído: +100000")
+}
