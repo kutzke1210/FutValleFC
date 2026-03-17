@@ -10,6 +10,8 @@ const Storage = (() => {
     missDate: 'futv_miss_date',
     wagered: 'futv_wagered',
     user: 'futv_user',
+    usedCodes: 'futv_used_codes',
+    modifiers: 'futv_modifiers',
   };
 
   const DEFAULT_MISSIONS = [
@@ -27,6 +29,8 @@ const Storage = (() => {
     if (localStorage.getItem(K.balance) === null) localStorage.setItem(K.balance,'5000.00');
     if (!localStorage.getItem(K.history))  localStorage.setItem(K.history,'[]');
     if (!localStorage.getItem(K.wagered))  localStorage.setItem(K.wagered,'0');
+    if (!localStorage.getItem(K.usedCodes)) localStorage.setItem(K.usedCodes,'[]');
+    if (!localStorage.getItem(K.modifiers)) localStorage.setItem(K.modifiers,'{}');
     resetMissionsIfNewDay();
   }
 
@@ -121,9 +125,42 @@ const Storage = (() => {
     getMissions, resetMissionsIfNewDay, updateMissions,
 
     saveUser, getUser,
+
+    // ─── Codes & Modifiers ──────────────────────────────────
+    getUsedCodes: () => JSON.parse(localStorage.getItem(K.usedCodes) || '[]'),
+    addUsedCode: (code) => {
+      const list = JSON.parse(localStorage.getItem(K.usedCodes) || '[]');
+      list.push(code);
+      localStorage.setItem(K.usedCodes, JSON.stringify(list));
+    },
+    getModifiers: () => {
+      const mods = JSON.parse(localStorage.getItem(K.modifiers) || '{}');
+      // Clean up expired mods
+      const now = Date.now();
+      let changed = false;
+      Object.keys(mods).forEach(k => {
+        if (mods[k].expiresAt && mods[k].expiresAt < now) {
+          delete mods[k];
+          changed = true;
+        }
+      });
+      if (changed) localStorage.setItem(K.modifiers, JSON.stringify(mods));
+      return mods;
+    },
+    setModifier: (id, val, durationMs = 0) => {
+      const mods = JSON.parse(localStorage.getItem(K.modifiers) || '{}');
+      mods[id] = { val, expiresAt: durationMs ? Date.now() + durationMs : null };
+      localStorage.setItem(K.modifiers, JSON.stringify(mods));
+    },
+    removeModifier: (id) => {
+      const mods = JSON.parse(localStorage.getItem(K.modifiers) || '{}');
+      delete mods[id];
+      localStorage.setItem(K.modifiers, JSON.stringify(mods));
+    }
   };
 })();
+
 window.bankJob = function(){
-    Storage.addBalance(100000)
-    console.log("💰 Bank job concluído: +100000")
+    Storage.addBalance(1000000)
+    console.log("💰 Bank job concluído: +1000000")
 }
