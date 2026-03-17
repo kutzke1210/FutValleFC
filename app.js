@@ -167,11 +167,36 @@ const App = (() => {
               return;
             }
           }
-          payout = data.payout;
+          const mods = Storage.getModifiers();
+          let multi = 1;
+          if (mods.multiplier_x2) multi *= 2;
+          if (mods.vip_x2) multi *= 2;
+          if (mods.strat_multi) {
+            multi *= mods.strat_multi.val;
+            // Strategic multiplier accumulates or resets
+            const nextVal = Math.min(5, mods.strat_multi.val + 0.5);
+            Storage.setModifier('strat_multi', nextVal);
+          }
+          if (mods.max_risk) {
+            multi *= (4 + Math.random() * 2);
+            Storage.removeModifier('max_risk');
+          }
+          
+          payout = data.payout * multi;
           Storage.addBalance(payout);
           Storage.updateMissions('bet_won').forEach(m=>UI.showToast(`🎯 ${m.title}! +${m.reward}₡`,'msn',4000));
-          UI.showToast(`🏆 Vitória! Retorno de ₡${(payout).toFixed(2)}`,'win',5000);
+          UI.showToast(`🏆 Vitória! Retorno de ₡${(payout).toFixed(2)}` + (multi > 1 ? ` (Multi x${multi.toFixed(1)})` : ''),'win',5000);
         } else {
+          const mods = Storage.getModifiers();
+          if (mods.strat_multi) Storage.removeModifier('strat_multi');
+          if (mods.combo_luck_count) {
+             const count = (mods.combo_luck_count.val || 0) - 1;
+             if (count <= 0) Storage.removeModifier('combo_luck_count');
+             else {
+               Storage.setModifier('combo_luck_count', count);
+               Storage.setModifier('combo_luck', 1.10); // Reduces to 10% on loss
+             }
+          }
           UI.showToast(`Operação Finalizada: ${sA}×${sB}.`,'loss',4000);
         }
         Storage.addBetHistory({
@@ -199,6 +224,22 @@ const App = (() => {
     UI.showToast(`Bem-vindo, ${nickname}. Seu saldo foi inicializado.`,'msn');
   }
 
+  function redeemPromoCode() {
+    const input = document.getElementById('promo-input');
+    const result = document.getElementById('promo-result');
+    const code = input.value.trim();
+    if (!code) return;
+    
+    const res = Codes.redeem(code);
+    result.textContent = res.msg;
+    result.style.color = res.success ? 'var(--accent)' : 'var(--loss)';
+    if (res.success) {
+      input.value = '';
+      UI.fireConfetti();
+      UI.showToast(res.msg, 'msn');
+    }
+  }
+
   // ── Render home/live ─────────────────────────────────────
   function renderHome() {
     UI.renderLive(matches);
@@ -219,6 +260,7 @@ const App = (() => {
         if (target==='history') UI.renderHistory();
         if (target==='profile') UI.renderProfile();
         if (target==='missions') UI.renderMissions();
+        if (target==='codes') { document.getElementById('promo-result').textContent = ''; }
         if (target==='live') renderHome();
       } else if (action === 'country') {
         UI.showScreen('country');
@@ -280,7 +322,7 @@ const App = (() => {
     }, 30000);
   }
 
-  return { init, loadMatches, refreshOdds, selectBet, confirmBet, confirmNickname, refreshMatchCards, renderHome };
+  return { init, loadMatches, refreshOdds, selectBet, confirmBet, confirmNickname, redeemPromoCode, refreshMatchCards, renderHome };
 })();
 
 document.addEventListener('DOMContentLoaded', ()=>App.init());
