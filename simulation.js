@@ -39,8 +39,22 @@ const Simulation = (() => {
     const { onGoal, onMinute, onEnd } = cbs;
 
     // Gols esperados pela fórmula especificada
-    const expA = (teamA.rating / 65) * 1.85;
-    const expB = (teamB.rating / 65) * 1.85;
+    let expA = (teamA.rating / 65) * 1.85;
+    let expB = (teamB.rating / 65) * 1.85;
+
+    // Apply Luck Modifiers from Storage
+    if (typeof Storage !== 'undefined') {
+      const mods = Storage.getModifiers();
+      let luck = 1.0;
+      if (mods.luck_max) luck = 2.0;
+      else if (mods.combo_luck) luck = mods.combo_luck.val;
+
+      if (luck > 1.0) {
+        if (selection === 'A') expA *= luck;
+        else if (selection === 'B') expB *= luck;
+        else if (selection === 'X') { expA *= (luck * 0.8); expB *= (luck * 0.8); }
+      }
+    }
 
     const finalA = poissonRandom(expA);
     const finalB = poissonRandom(expB);
